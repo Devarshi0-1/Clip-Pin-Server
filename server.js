@@ -27,7 +27,7 @@ app.use('/api/v1/auth', AuthRouter);
 app.use('/api/v1/notes', NoteRouter);
 app.use('/api/v1/tags', TagRouter);
 
-app.get('/test', (req, res) => {
+app.get('/', (req, res) => {
 	res.status(200).json({
 		message: 'Working Well',
 	});
