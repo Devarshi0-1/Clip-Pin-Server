@@ -1,5 +1,6 @@
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import express from 'express';
 import { connectDB } from './database/mongo.js';
 import AuthRouter from './routes/auth.routes.js';
@@ -14,6 +15,13 @@ app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(
+	cors({
+		origin: [process.env.FRONTEND_URL],
+		methods: ['GET', 'POST', 'PUT', 'DELETE'],
+		credentials: true,
+	})
+);
 
 app.use('/api/v1/auth', AuthRouter);
 app.use('/api/v1/notes', NoteRouter);
