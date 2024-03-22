@@ -13,10 +13,11 @@ export const generateCookie = (res, userId) => {
 		expiresIn: '15d',
 	});
 
-    res.cookie("jwt", token, {
-		maxAge,
+	res.cookie('jwt', token, {
 		httpOnly: true,
-		sameSite: "strict",
-		secure: process.env.NODE_ENV !== "DEVELOPMENT",
+		maxAge,
+		sameSite: process.env.NODE_ENV === 'DEVELOPMENT' ? 'lax' : 'none',
+		secure: process.env.NODE_ENV === 'DEVELOPMENT' ? false : true,
+		origin: process.env.FRONTEND_URL,
 	});
 };
