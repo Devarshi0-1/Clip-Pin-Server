@@ -90,7 +90,7 @@ export const createNote = async (req, res) => {
 export const editNote = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { title, content } = req.body;
+		const { title, content, isArchived } = req.body;
 
 		if (isEmpty(id))
 			return sendErrorResponse(
@@ -102,18 +102,16 @@ export const editNote = async (req, res) => {
 		if (!isValidObjectId(id))
 			return sendErrorResponse(res, httpCode.badRequest, 'Invalid Id!');
 
-		if (isEmpty(title) && isEmpty(content))
+		if (isEmpty(title) && isEmpty(content) && isEmpty(isArchived.toString()))
 			return sendErrorResponse(
 				res,
 				httpCode.badRequest,
-				'Both Title and Content cannot be empty!'
+				'Both Title, Content and Archived cannot be empty!'
 			);
 
 		const note = await Note.findByIdAndUpdate(
 			{ _id: id },
-			{
-				$set: { title, content },
-			},
+			{ $set: { title, content, isArchived } },
 			{ new: true }
 		).populate('tags');
 
