@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+	batchDeleteNote,
 	createNote,
 	deleteNote,
 	editNote,
@@ -12,6 +13,8 @@ const router = Router();
 router.get('/my', protectRoute, getMyNotes);
 
 router.post('/new', protectRoute, createNote);
+
+router.route('/batch-delete').delete(protectRoute, batchDeleteNote);
 
 router
 	.route('/:id')

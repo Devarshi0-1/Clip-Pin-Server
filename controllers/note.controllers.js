@@ -90,7 +90,7 @@ export const createNote = async (req, res) => {
 export const editNote = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { title, content, isArchived } = req.body;
+		const { title, content, isArchived, isBookmarked } = req.body;
 
 		if (isEmpty(id))
 			return sendErrorResponse(
@@ -102,16 +102,28 @@ export const editNote = async (req, res) => {
 		if (!isValidObjectId(id))
 			return sendErrorResponse(res, httpCode.badRequest, 'Invalid Id!');
 
-		if (isEmpty(title) && isEmpty(content) && isEmpty(isArchived.toString()))
+		if (
+			isEmpty(title) &&
+			isEmpty(content) &&
+			isEmpty((!!isArchived).toString()) &&
+			isEmpty((!!isBookmarked).toString())
+		)
 			return sendErrorResponse(
 				res,
 				httpCode.badRequest,
-				'Both Title, Content and Archived cannot be empty!'
+				'All fields cannot be empty!'
+			);
+
+		if (isArchived && isBookmarked)
+			return sendErrorResponse(
+				res,
+				httpCode.badRequest,
+				'Cannot bookmark an archived note!'
 			);
 
 		const note = await Note.findByIdAndUpdate(
 			{ _id: id },
-			{ $set: { title, content, isArchived } },
+			{ $set: { title, content, isArchived, isBookmarked } },
 			{ new: true }
 		).populate('tags');
 
@@ -120,6 +132,13 @@ export const editNote = async (req, res) => {
 				res,
 				httpCode.resourceNotFound,
 				'Note Not Found!'
+			);
+
+		if (note.isArchived && note.isBookmarked)
+			return sendErrorResponse(
+				res,
+				httpCode.badRequest,
+				'Cannot bookmark an archived note!'
 			);
 
 		return sendSuccessResponse(
@@ -159,7 +178,15 @@ export const deleteNote = async (req, res) => {
 		if (!isValidObjectId(id))
 			return sendErrorResponse(res, httpCode.badRequest, 'Invalid Id!');
 
-		await Note.deleteOne({ _id: id });
+		const ok = await Note.deleteOne({ _id: id });
+
+		if (!ok)
+			return sendErrorResponse(
+				res,
+				httpCode.internalServerError,
+				null,
+				'Some error occurred!'
+			);
 
 		return sendSuccessResponse(
 			res,
@@ -169,6 +196,67 @@ export const deleteNote = async (req, res) => {
 		);
 	} catch (error) {
 		console.error('Error in EditNote Controller', error.message);
+		return sendErrorResponse(
+			res,
+			httpCode.badRequest,
+			'Internal Server Error!'
+		);
+	}
+};
+
+/**
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ *  @returns {import('express').Response}
+ */
+
+export const batchDeleteNote = async (req, res) => {
+	try {
+        const { selectedNotes } = req.body;
+        
+        console.log(selectedNotes)
+
+		if (!Array.isArray(selectedNotes) || !selectedNotes.length)
+			return sendErrorResponse(
+				res,
+				httpCode.badRequest,
+				'No selected Notes provided!'
+			);
+
+		if (isEmpty(...selectedNotes))
+			return sendErrorResponse(
+				res,
+				httpCode.badRequest,
+				'Empty Note Id(s) provided!'
+			);
+
+		if (!isValidObjectId(...selectedNotes))
+			return sendErrorResponse(
+				res,
+				httpCode.badRequest,
+				'Invalid Note Id(s) provided!'
+			);
+
+		const ok = await Note.deleteMany({ _id: { $in: selectedNotes } });
+
+		if (!ok)
+			return sendErrorResponse(
+				res,
+				httpCode.internalServerError,
+				null,
+				'Some error occurred!'
+			);
+
+		return sendSuccessResponse(
+			res,
+			httpCode.successful,
+			selectedNotes,
+			'All notes deleted successfully!'
+		);
+	} catch (error) {
+		console.error('Error in BatchDeleteNote Controller', error.message);
+
 		return sendErrorResponse(
 			res,
 			httpCode.badRequest,

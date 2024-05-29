@@ -15,6 +15,14 @@ const noteSchema = new Schema(
 			type: Boolean,
 			default: false,
 		},
+		isBookmarked: {
+			type: Boolean,
+			default: false,
+		},
+		bookmarkedAt: {
+			type: Date,
+			default: null,
+		},
 		tags: [
 			{
 				type: Schema.Types.ObjectId,
