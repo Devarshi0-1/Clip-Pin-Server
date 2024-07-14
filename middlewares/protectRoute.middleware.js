@@ -39,10 +39,10 @@ export const protectRoute = async (req, res, next) => {
 				res,
 				httpCode.resourceNotFound,
 				'User not found!'
-			);
-
+            );
+        
 		req.user = user;
-
+        
 		next();
 	} catch (error) {
 		console.log('Error at function protectedRoute: ', error.message);
