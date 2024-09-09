@@ -96,7 +96,7 @@ export const register = async (req, res) => {
 				'Required Fields empty!'
 			);
 
-		if (fullName.length >= 20 || username >= 20 || password.length >= 20)
+		if (fullName.length >= 20 || username.length >= 20 || password.length >= 20)
 			return sendErrorResponse(
 				res,
 				httpCode.badRequest,
