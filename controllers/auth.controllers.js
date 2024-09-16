@@ -89,6 +89,27 @@ export const register = async (req, res) => {
 	try {
 		const { fullName, username, password } = req.body;
 
+		if (typeof fullName !== 'string')
+			return sendErrorResponse(
+				res,
+				httpCode.badRequest,
+				'Full Name must be a string!'
+			);
+
+		if (typeof username !== 'string')
+			return sendErrorResponse(
+				res,
+				httpCode.badRequest,
+				'Username must be a string!'
+			);
+
+		if (typeof password !== 'string')
+			return sendErrorResponse(
+				res,
+				httpCode.badRequest,
+				'Password must be a string!'
+			);
+
 		if (isEmpty(fullName, username, password))
 			return sendErrorResponse(
 				res,
@@ -100,7 +121,7 @@ export const register = async (req, res) => {
 			return sendErrorResponse(
 				res,
 				httpCode.badRequest,
-				'Exceed character limit!'
+				'Full name, Username or Password cannot exceed 20 characters!'
 			);
 
 		if (!isUserNameValid(username))
